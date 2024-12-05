@@ -1,0 +1,241 @@
+import random
+from datetime import datetime, timedelta
+import csv
+
+# Expanded lists of first names and last names
+first_names = [
+    "Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Hannah", "Isaac", "Jack",
+    "Liam", "Olivia", "Noah", "Emma", "Ava", "Sophia", "William", "Mia", "James", "Isabella",
+    "Benjamin", "Charlotte", "Lucas", "Amelia", "Henry", "Evelyn", "Alexander", "Harper",
+    "Sebastian", "Ella", "Daniel", "Chloe", "Matthew", "Scarlett", "Owen", "Luna", "Jack", 
+    "Zoe", "Michael", "Nora", "Samuel", "Layla", "David", "Aria", "Joseph", "Mila", "Wyatt", 
+    "Hazel", "Carter", "Addison", "Andrew", "Peyton", "Eli", "Riley", "Jackson", "Avery",
+    "Luke", "Sofia", "Gabriel", "Camila", "Caleb", "Kinsley", "Ethan", "Madison", "Isaiah",
+    "Skylar", "Dylan", "Brooklyn", "Jonathan", "Bella", "Matthew", "Aubrey", "Christian",
+    "Ellie", "Joshua", "Lily", "Julian", "Nadia", "Aaron", "Claire", "Jaxon", "Lucy", 
+    "Levi", "Autumn", "Adrian", "Sarah", "Luis", "Anna", "Xander", "Victoria", "Chase", 
+    "Sadie", "Timothy", "Samantha", "Jonah", "Natalie", "Ezekiel", "Grace", "Nicolas", 
+    "Ruth", "Omar", "Valentina", "Brian", "Skylar", "Asher", "Daphne", "Ryder", "Marley",
+    "Cohen", "Maverick", "Mackenzie", "Brayden", "Kylie", "Dawson", "Payton", "Brandon",
+    "Kylie", "Landon", "Charlotte", "Axel", "Vivian", "Marco", "Zara", "Tristan", 
+    "Cecilia", "Finn", "Julia", "Leon", "Savannah", "Emery", "Paige", "Grayson", 
+    "Carter", "Cora", "Theo", "Mya", "Mason", "Daisy", "Luka", "Gemma", "Brooks", 
+    "Wesley", "Lana", "Jude", "Sierra", "Gavin", "Bailey", "Kieran", "Elena"
+] * 100  # Repeating to create a larger pool
+
+last_names = [
+    "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", 
+    "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", 
+    "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", 
+    "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", 
+    "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", 
+    "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", 
+    "Carter", "Roberts", "Gonzales", "Phillips", "Evans", "Turner", "Diaz", "Parker", 
+    "Collins", "Edwards", "Stewart", "Sanchez", "Morris", "Rogers", "Reed", "Cook", 
+    "Morgan", "Bell", "Murphy", "Cooper", "Richardson", "Cox", "Howard", "Ward", 
+    "Torres", "Peterson", "Gray", "Ramirez", "James", "Watson", "Brooks", "Kelly", 
+    "Sanders", "Price", "Bennett", "Wood", "Barnes", "Ross", "Henderson", "Coleman", 
+    "Jenkins", "Perry", "Powell", "Long", "Patterson", "Hughes", "Flores", "Washington"
+] * 50  # Repeating to create a larger pool
+
+# List of first name for fathers and father's occupations
+father_first_names = [
+    "Michael", "James", "Robert", "John", "David", "William", "Joseph", 
+    "Charles", "Thomas", "Daniel", "Samuel", "Henry", "George", "Richard", 
+    "Matthew", "Andrew", "Joshua", "Christopher", "Adam"
+]
+
+occupations = ["Teacher", "Engineer", "Doctor", "Farmer", "Mechanic", "Nurse", "Carpenter", "Driver", "Chef", "Electrician"]
+
+# Gender mapping based on first names (for simplicity, this can be expanded)
+gender_mapping_old = {
+    "Alice": "Female", "Bob": "Male", "Charlie": "Male", "Diana": "Female", "Eve": "Female",
+    "Frank": "Male", "Grace": "Female", "Hannah": "Female", "Isaac": "Male", "Jack": "Male",
+    "Liam": "Male", "Olivia": "Female", "Noah": "Male", "Emma": "Female", "Ava": "Female",
+    # ... (Add more mappings as necessary)
+}
+
+
+gender_mapping_2= {'Smith': 'Male', 'Johnson': 'Male', 'Williams': 'Male', 'Brown': 'Male', 'Jones': 'Male', 
+ 'Garcia': 'Female', 'Miller': 'Female', 'Davis': 'Male', 'Rodriguez': 'Male', 'Martinez': 'Male', 
+ 'Hernandez': 'Male', 'Lopez': 'Female', 'Gonzalez': 'Male', 'Wilson': 'Male', 'Anderson': 'Male', 
+ 'Thomas': 'Male', 'Taylor': 'Female', 'Moore': 'Female', 'Jackson': 'Male', 'Martin': 'Male', 
+ 'Lee': 'Male', 'Perez': 'Male', 'Thompson': 'Male', 'White': 'Female', 'Harris': 'Male', 
+ 'Sanchez': 'Female', 'Clark': 'Male', 'Ramirez': 'Female', 'Lewis': 'Male', 'Robinson': 'Male', 
+ 'Walker': 'Male', 'Young': 'Male', 'Allen': 'Male', 'King': 'Male', 'Wright': 'Male', 'Scott': 'Male', 
+ 'Torres': 'Female', 'Nguyen': 'Male', 'Hill': 'Male', 'Flores': 'Female', 'Green': 'Male', 
+ 'Adams': 'Male', 'Nelson': 'Male', 'Baker': 'Female', 'Hall': 'Male', 'Rivera': 'Female', 
+ 'Campbell': 'Female', 'Mitchell': 'Female', 'Carter': 'Male', 'Roberts': 'Male', 'Gonzales': 'Male', 
+ 'Phillips': 'Male', 'Evans': 'Female', 'Turner': 'Male', 'Diaz': 'Male', 'Parker': 'Male', 
+ 'Collins': 'Male', 'Edwards': 'Male', 'Stewart': 'Male', 'Morris': 'Female', 'Rogers': 'Male', 
+ 'Reed': 'Female', 'Cook': 'Female', 'Morgan': 'Male', 'Bell': 'Male', 'Murphy': 'Male', 
+ 'Cooper': 'Male', 'Richardson': 'Male', 'Cox': 'Female', 'Howard': 'Male', 'Ward': 'Male', 
+ 'Peterson': 'Male', 'Gray': 'Female', 'James': 'Male', 'Watson': 'Male', 'Brooks': 'Female', 
+ 'Kelly': 'Female', 'Sanders': 'Female', 'Price': 'Male', 'Bennett': 'Male', 'Wood': 'Male', 
+ 'Barnes': 'Male', 'Ross': 'Male', 'Henderson': 'Male', 'Coleman': 'Male', 'Jenkins': 'Female', 
+ 'Perry': 'Male', 'Powell': 'Male', 'Long': 'Female', 'Patterson': 'Male', 'Hughes': 'Male', 'Washington': 'Male'}
+
+gender_mapping = {'Alice': 'Female', 'Bob': 'Male', 'Charlie': 'Male', 'Diana': 'Female', 'Eve': 'Female', 'Frank': 'Male', 
+ 'Grace': 'Female', 'Hannah': 'Female', 'Isaac': 'Male', 'Jack': 'Male', 'Liam': 'Female', 'Olivia': 'Female', 
+ 'Noah': 'Male', 'Emma': 'Female', 'Ava': 'Female', 'Sophia': 'Female', 'William': 'Male', 'Mia': 'Female', 
+ 'James': 'Male', 'Isabella': 'Female', 'Benjamin': 'Male', 'Charlotte': 'Female', 'Lucas': 'Male', 
+ 'Amelia': 'Female', 'Henry': 'Male', 'Evelyn': 'Female', 'Alexander': 'Male', 'Harper': 'Female', 
+ 'Sebastian': 'Male', 'Ella': 'Female', 'Daniel': 'Male', 'Chloe': 'Female', 'Matthew': 'Male', 
+ 'Scarlett': 'Female', 'Owen': 'Male', 'Luna': 'Female', 'Zoe': 'Female', 'Michael': 'Male', 'Nora': 'Female', 
+ 'Samuel': 'Male', 'Layla': 'Female', 'David': 'Male', 'Aria': 'Female', 'Joseph': 'Male', 'Mila': 'Male', 
+ 'Wyatt': 'Male', 'Hazel': 'Female', 'Carter': 'Male', 'Addison': 'Female', 'Andrew': 'Male', 'Peyton': 'Male', 
+ 'Eli': 'Female', 'Riley': 'Female', 'Jackson': 'Male', 'Avery': 'Female', 'Luke': 'Male', 'Sofia': 'Female', 
+ 'Gabriel': 'Male', 'Camila': 'Female', 'Caleb': 'Male', 'Kinsley': 'Male', 'Ethan': 'Male', 'Madison': 'Female', 
+ 'Isaiah': 'Male', 'Skylar': 'Male', 'Dylan': 'Male', 'Brooklyn': 'Male', 'Jonathan': 'Male', 'Bella': 'Female', 
+ 'Aubrey': 'Female', 'Christian': 'Male', 'Ellie': 'Female', 'Joshua': 'Male', 'Lily': 'Female', 'Julian': 'Male', 
+ 'Nadia': 'Female', 'Aaron': 'Male', 'Claire': 'Female', 'Jaxon': 'Male', 'Lucy': 'Female', 'Levi': 'Male', 
+ 'Autumn': 'Male', 'Adrian': 'Male', 'Sarah': 'Female', 'Luis': 'Male', 'Anna': 'Female', 'Xander': 'Male', 
+ 'Victoria': 'Female', 'Chase': 'Male', 'Sadie': 'Female', 'Timothy': 'Male', 'Samantha': 'Female', 'Jonah': 'Male', 
+ 'Natalie': 'Female', 'Ezekiel': 'Male', 'Nicolas': 'Male', 'Ruth': 'Female', 'Omar': 'Male', 'Valentina': 'Female', 
+ 'Brian': 'Male', 'Asher': 'Male', 'Daphne': 'Female', 'Ryder': 'Male', 'Marley': 'Male', 'Cohen': 'Male', 
+ 'Maverick': 'Male', 'Mackenzie': 'Female', 'Brayden': 'Male', 'Kylie': 'Female', 'Dawson': 'Male', 'Payton': 'Male', 
+ 'Brandon': 'Male', 'Landon': 'Male', 'Axel': 'Female', 'Vivian': 'Female', 'Marco': 'Male', 'Zara': 'Female', 
+ 'Tristan': 'Male', 'Cecilia': 'Female', 'Finn': 'Male', 'Julia': 'Female', 'Leon': 'Male', 'Savannah': 'Female', 
+ 'Emery': 'Female', 'Paige': 'Male', 'Grayson': 'Male', 'Cora': 'Female', 'Theo': 'Male', 'Mya': 'Female', 'Mason': 'Male', 
+ 'Daisy': 'Female', 'Luka': 'Male', 'Gemma': 'Female', 'Brooks': 'Male', 'Wesley': 'Male', 'Lana': 'Female', 'Jude': 'Male', 
+ 'Sierra': 'Female', 'Gavin': 'Male', 'Bailey': 'Female', 'Kieran': 'Male', 'Elena': 'Female'}
+
+
+towns = [
+    "Douala", "Yaounde", "Bamenda", "Buea", "Limbe", "Kumba", "Bafoussam", 
+    "Garoua", "Maroua", "Ngaoundere", "Foumban", "Dschang", "Ebolowa", 
+    "Bafang", "Loum", "Kribi", "Batouri", "Akwa", "Buea", "Mamfe", "Loum", "Douala", "Bangui", "Mbalmayo", 
+    "Sangmelima", "Tiko", "Mokolo", "Mbanga", "Banga-Banga", "Obala", "New York", "Lagos", "Auchi", "Onitsha"
+]
+
+
+# Function to determine gender based on first name
+def determine_gender(first_name):
+    return gender_mapping.get(first_name, "Unknown")
+
+# Function to generate a random class (grade) between 7 and 13
+def generate_class():
+    return random.randint(7, 13)
+
+# Function to calculate tuition based on the class (grade)
+def calculate_tuition(grade):
+    if grade >= 7 and grade <= 9:  # Middle school
+        return 17500
+    elif grade >= 10 and grade <= 13:  # High school
+        return 25000
+    return 0
+
+# Function to generate a random payment amount for tuition
+def generate_payment(tuition):
+    # Students can pay a portion of the tuition or nothing
+    if random.random() < 0.3:  # 30% chance of not paying at all
+        return 0
+    else:
+        return random.randint(0, tuition)  # Pay anywhere from 0 to full tuition
+
+# Function to generate a random student name ensuring uniqueness
+def generate_student_name(used_names):
+    max_possible_names = len(first_names) * len(last_names)
+    if len(used_names) >= max_possible_names:
+        raise Exception("All possible unique names have been used.")
+    
+    while True:
+        first_name = random.choice(first_names)
+        last_name = random.choice(last_names)
+        full_name = f"{first_name} {last_name}"
+        if full_name not in used_names:
+            used_names.add(full_name)
+            return full_name, last_name, first_name  # Return first_name for gender determination
+
+# Function to generate a random date of birth for students
+def generate_random_dob(min_age=11, max_age=15):
+    today = datetime.today()
+    start_date = today - timedelta(days=max_age * 365)
+    end_date = today - timedelta(days=min_age * 365)
+    random_date = start_date + (end_date - start_date) * random.random()
+    return random_date.strftime("%Y-%m-%d")
+
+# Function to calculate age from date of birth
+def calculate_age(dob):
+    dob = datetime.strptime(dob, "%Y-%m-%d")
+    today = datetime.today()
+    age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+    return age
+
+# Function to generate a random place of birth
+def generate_place_of_birth():
+    return random.choice(towns)
+
+# Function to generate a random father's name with the same last name
+def generate_father_name(last_name):
+    first_name = random.choice(father_first_names)
+    return f"{first_name} {last_name}"
+
+# Function to generate a random occupation
+def generate_occupation():
+    return random.choice(occupations)
+
+# Function to generate student data
+def generate_student_data(num_students):
+    students = []
+    used_names = set()  # Use a set for faster lookup
+    for _ in range(num_students):
+        try:
+            student_name, last_name, first_name = generate_student_name(used_names)
+        except Exception as e:
+            print(e)
+            break  # Stop if all unique names are used
+
+        dob = generate_random_dob()
+        age = calculate_age(dob)
+        place_of_birth = generate_place_of_birth()
+        father_name = generate_father_name(last_name)
+        father_occupation = generate_occupation()
+        
+        # Generate class and tuition
+        grade = generate_class()
+        tuition_due = calculate_tuition(grade)
+        tuition_paid = generate_payment(tuition_due)
+        gender = determine_gender(first_name)
+
+        students.append({
+            "Student ID": f"ID-{grade}-{_}-{age}-2024",
+            "Student Name": student_name,
+            "DOB": dob,
+            "Age": age,
+            "Place of Birth": place_of_birth,
+            "Gender": gender,
+            "Class": grade,
+            "Father's Name": father_name,
+            "Father's Occupation": father_occupation,
+            "Tuition Due": tuition_due,
+            "Tuition Paid": tuition_paid
+        })
+    return students
+
+
+
+# Function to write student data to a CSV file
+def write_to_csv(students, filename="student_data_2.csv"):
+    with open(filename, mode='r+', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=[
+            "Student ID", "Student Name", "DOB", "Age", "Place of Birth", 
+            "Father's Name", "Father's Occupation", "Gender", 
+            "Class", "Tuition Due", "Tuition Paid"
+        ])
+        writer.writeheader()
+        for student in students:
+            writer.writerow(student)
+    print(f"Data written to {filename} successfully.")
+
+# Generate data for a specified number of students
+num_students = 10000  # Updated to 50,000
+student_data = generate_student_data(num_students)
+
+# Write the student data to a CSV file
+write_to_csv(student_data)
+
+# Optionally, print the student data
+# Uncomment the following lines to print student data (may be very large)
+# for student in student_data:
+#     print(student)
